@@ -169,10 +169,10 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
     }
   }
 
-  /// @dev Update the fees for a hooks template
-  /// Note: The new fee structure will apply to all NEW markets created with existing
-  ///       or future instances of the hooks template, and the protocol fee can be pushed
-  ///       to existing markets using `pushProtocolFeeBipsUpdates`.
+  // @dev Update the fees for a hooks template
+  // Note: The new fee structure will apply to all NEW markets created with existing
+  //       or future instances of the hooks template, and the protocol fee can be pushed
+  //       to existing markets using `pushProtocolFeeBipsUpdates`.
   function updateHooksTemplateFees(
     address hooksTemplate,
     address feeRecipient,
@@ -269,9 +269,9 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
   //                               Hooks Instances                              //
   // ========================================================================== //
 
-  /// @dev Deploy a hooks instance for an approved template with constructor args.
-  ///      Callable by approved borrowers on the arch-controller.
-  ///      May require payment of origination fees.
+  // @dev Deploy a hooks instance for an approved template with constructor args.
+  //      Callable by approved borrowers on the arch-controller.
+  //      May require payment of origination fees.
   function deployHooksInstance(
     address hooksTemplate,
     bytes calldata constructorArgs
