@@ -66,7 +66,7 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
   }
 
   /*
-    @dev Registers the factory as a controller with the arch-controller, allowing
+    dev Registers the factory as a controller with the arch-controller, allowing
          it to register new markets.
          Needs to be executed once at deployment.
          Does not need checks for whether it has already been registered as the
@@ -85,7 +85,7 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
   // ========================================================================== //
 
   /*
-    @dev Get the temporary market parameters from transient storage.
+    dev Get the temporary market parameters from transient storage.
    */
   function _getTmpMarketParameters()
     internal
@@ -96,7 +96,7 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
   }
 
   /*
-    @dev Set the temporary market parameters in transient storage.
+    dev Set the temporary market parameters in transient storage.
    */
   function _setTmpMarketParameters(TmpMarketParameterStorage memory parameters) internal {
     _tmpMarketParameters.write(abi.encode(parameters));
@@ -169,8 +169,8 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
     }
   }
 
-  // @dev Update the fees for a hooks template
-  // Note: The new fee structure will apply to all NEW markets created with existing
+  // dev Update the fees for a hooks template
+  // Note The new fee structure will apply to all NEW markets created with existing
   //       or future instances of the hooks template, and the protocol fee can be pushed
   //       to existing markets using `pushProtocolFeeBipsUpdates`.
   function updateHooksTemplateFees(
@@ -269,7 +269,7 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
   //                               Hooks Instances                              //
   // ========================================================================== //
 
-  // @dev Deploy a hooks instance for an approved template with constructor args.
+  // dev Deploy a hooks instance for an approved template with constructor args.
   //      Callable by approved borrowers on the arch-controller.
   //      May require payment of origination fees.
   function deployHooksInstance(
@@ -298,7 +298,7 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
       revert HooksTemplateNotAvailable();
     }
 
-    assembly {
+    /* assembly {
       let initCodePointer := mload(0x40)
       let initCodeSize := sub(extcodesize(hooksTemplate), 1)
       // Copy code from target address to memory starting at byte 1
@@ -321,6 +321,23 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
         mstore(0x00, 0x30116425) // DeploymentFailed()
         revert(0x1c, 0x04)
       }
+    } */
+    assembly {
+      let initCodePointer := mload(0x40)
+      let initCodeSize := sub(extcodesize(hooksTemplate), 1)
+      extcodecopy(hooksTemplate, initCodePointer, 1, initCodeSize)
+      let endInitCodePointer := add(initCodePointer, initCodeSize)
+      mstore(endInitCodePointer, caller())
+      mstore(add(endInitCodePointer, 0x20), 0x40)
+      let constructorArgsSize := constructorArgs.length
+      mstore(add(endInitCodePointer, 0x40), constructorArgsSize)
+      calldatacopy(add(endInitCodePointer, 0x60), constructorArgs.offset, constructorArgsSize)
+      let initCodeSizeWithArgs := add(add(initCodeSize, 0x60), constructorArgsSize)
+      hooksInstance := create(0, initCodePointer, initCodeSizeWithArgs)
+      if iszero(hooksInstance) {
+        mstore(0x00, 0x30116425)
+        revert(0x1c, 0x04)
+      }
     }
 
     emit HooksInstanceDeployed(hooksInstance, hooksTemplate);
@@ -332,7 +349,7 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
   // ========================================================================== //
 
   /*
-    @dev Get the temporarily stored market parameters for a market that is
+    dev Get the temporarily stored market parameters for a market that is
          currently being deployed.
    */
   function getMarketParameters()
@@ -369,12 +386,12 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
   }
 
   /*
-    @dev Given a string of at most 63 bytes, produces a packed version with two words,
+    dev Given a string of at most 63 bytes, produces a packed version with two words,
          where the first word contains the length byte and the first 31 bytes of the string,
          and the second word contains the second 32 bytes of the string.
    */
   function _packString(string memory str) internal pure returns (bytes32 word0, bytes32 word1) {
-    assembly {
+    /* assembly {
       let length := mload(str)
       // Equivalent to:
       // if (str.length > 63) revert NameOrSymbolTooLong();
@@ -386,6 +403,15 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
       // by reading from 31 bytes after the length pointer.
       word0 := mload(add(str, 0x1f))
       // If the string is less than 32 bytes, the second word will be zeroed out.
+      word1 := mul(mload(add(str, 0x3f)), gt(mload(str), 0x1f))
+    } */
+    assembly {
+      let length := mload(str)
+      if gt(length, 0x3f) {
+        mstore(0, 0x19a65cb6)
+        revert(0x1c, 0x04)
+      }
+      word0 := mload(add(str, 0x1f))
       word1 := mul(mload(add(str, 0x3f)), gt(mload(str), 0x1f))
     }
   }
@@ -563,7 +589,8 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
     uint256 count = marketEndIndex - marketStartIndex;
     uint256 setProtocolFeeBipsCalldataPointer;
     uint16 protocolFeeBips = details.protocolFeeBips;
-    assembly {
+
+    /* assembly {
       // Write the calldata for `market.setProtocolFeeBips(protocolFeeBips)`
       // this will be reused for every market
       setProtocolFeeBipsCalldataPointer := mload(0x40)
@@ -573,12 +600,19 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
       mstore(add(setProtocolFeeBipsCalldataPointer, 0x20), protocolFeeBips)
       // Add 28 bytes to get the exact pointer to the first byte of the selector
       setProtocolFeeBipsCalldataPointer := add(setProtocolFeeBipsCalldataPointer, 0x1c)
+    } */
+    assembly {
+      setProtocolFeeBipsCalldataPointer := mload(0x40)
+      mstore(0x40, add(setProtocolFeeBipsCalldataPointer, 0x40))
+      mstore(setProtocolFeeBipsCalldataPointer, 0xae6ea191)
+      mstore(add(setProtocolFeeBipsCalldataPointer, 0x20), protocolFeeBips)
+      setProtocolFeeBipsCalldataPointer := add(setProtocolFeeBipsCalldataPointer, 0x1c)
     }
     for (uint256 i = 0; i < count; i++) {
       address market = markets[marketStartIndex + i];
+      //comment inside assembly: Equivalent to `revert SetProtocolFeeBipsFailed()`
       assembly {
         if iszero(call(gas(), market, 0, setProtocolFeeBipsCalldataPointer, 0x24, 0, 0)) {
-          // Equivalent to `revert SetProtocolFeeBipsFailed()`
           mstore(0, 0x4484a4a9)
           revert(0x1c, 0x04)
         }
