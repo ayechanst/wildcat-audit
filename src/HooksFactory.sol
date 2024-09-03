@@ -65,12 +65,12 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
     __SphereXProtectedRegisteredBase_init(IWildcatArchController(archController_).sphereXEngine());
   }
 
-  /**
-   * @dev Registers the factory as a controller with the arch-controller, allowing
-   *      it to register new markets.
-   *      Needs to be executed once at deployment.
-   *      Does not need checks for whether it has already been registered as the
-   *      arch-controller will revert if it is already registered.
+  /*
+    @dev Registers the factory as a controller with the arch-controller, allowing
+         it to register new markets.
+         Needs to be executed once at deployment.
+         Does not need checks for whether it has already been registered as the
+         arch-controller will revert if it is already registered.
    */
   function registerWithArchController() external override {
     IWildcatArchController(_archController).registerController(address(this));
@@ -84,8 +84,8 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
   //                          Internal Storage Helpers                          //
   // ========================================================================== //
 
-  /**
-   * @dev Get the temporary market parameters from transient storage.
+  /*
+    @dev Get the temporary market parameters from transient storage.
    */
   function _getTmpMarketParameters()
     internal
@@ -95,8 +95,8 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
     return abi.decode(_tmpMarketParameters.read(), (TmpMarketParameterStorage));
   }
 
-  /**
-   * @dev Set the temporary market parameters in transient storage.
+  /*
+    @dev Set the temporary market parameters in transient storage.
    */
   function _setTmpMarketParameters(TmpMarketParameterStorage memory parameters) internal {
     _tmpMarketParameters.write(abi.encode(parameters));
@@ -331,9 +331,9 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
   //                                   Markets                                  //
   // ========================================================================== //
 
-  /**
-   * @dev Get the temporarily stored market parameters for a market that is
-   *      currently being deployed.
+  /*
+    @dev Get the temporarily stored market parameters for a market that is
+         currently being deployed.
    */
   function getMarketParameters()
     external
@@ -368,10 +368,10 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
     return LibStoredInitCode.calculateCreate2Address(ownCreate2Prefix, salt, marketInitCodeHash);
   }
 
-  /**
-   * @dev Given a string of at most 63 bytes, produces a packed version with two words,
-   *      where the first word contains the length byte and the first 31 bytes of the string,
-   *      and the second word contains the second 32 bytes of the string.
+  /*
+    @dev Given a string of at most 63 bytes, produces a packed version with two words,
+         where the first word contains the length byte and the first 31 bytes of the string,
+         and the second word contains the second 32 bytes of the string.
    */
   function _packString(string memory str) internal pure returns (bytes32 word0, bytes32 word1) {
     assembly {
@@ -544,11 +544,11 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
     );
   }
 
-  /**
-   * @dev Push any changes to the fee configuration of `hooksTemplate` to markets
-   *      using any instances of that template at `_marketsByHooksTemplate[hooksTemplate]`.
-   *      Starts at `marketStartIndex` and ends one before `marketEndIndex`  or markets.length,
-   *      whichever is lowest.
+  /*
+    @dev Push any changes to the fee configuration of `hooksTemplate` to markets
+         using any instances of that template at `_marketsByHooksTemplate[hooksTemplate]`.
+         Starts at `marketStartIndex` and ends one before `marketEndIndex`  or markets.length,
+         whichever is lowest.
    */
   function pushProtocolFeeBipsUpdates(
     address hooksTemplate,
@@ -586,10 +586,9 @@ contract HooksFactory is SphereXProtectedRegisteredBase, ReentrancyGuard, IHooks
     }
   }
 
-
-  /**
-   * @dev Push any changes to the fee configuration of `hooksTemplate` to all markets
-   *      using any instances of that template at `_marketsByHooksTemplate[hooksTemplate]`.
+  /*
+    @dev Push any changes to the fee configuration of `hooksTemplate` to all markets
+         using any instances of that template at `_marketsByHooksTemplate[hooksTemplate]`.
    */
   function pushProtocolFeeBipsUpdates(address hooksTemplate) external {
     pushProtocolFeeBipsUpdates(hooksTemplate, 0, type(uint256).max);
