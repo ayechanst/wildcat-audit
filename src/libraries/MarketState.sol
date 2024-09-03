@@ -45,23 +45,23 @@ library MarketStateLib {
   using MathUtils for uint256;
   using SafeCastLib for uint256;
 
-  /**
-   * @dev Returns the normalized total supply of the market.
+  /*
+    @dev Returns the normalized total supply of the market.
    */
   function totalSupply(MarketState memory state) internal pure returns (uint256) {
     return state.normalizeAmount(state.scaledTotalSupply);
   }
 
-  /**
-   * @dev Returns the maximum amount of tokens that can be deposited without
-   *      reaching the maximum total supply.
+  /*
+    @dev Returns the maximum amount of tokens that can be deposited without
+         reaching the maximum total supply.
    */
   function maximumDeposit(MarketState memory state) internal pure returns (uint256) {
     return uint256(state.maxTotalSupply).satSub(state.totalSupply());
   }
 
-  /**
-   * @dev Normalize an amount of scaled tokens using the current scale factor.
+  /*
+    @dev Normalize an amount of scaled tokens using the current scale factor.
    */
   function normalizeAmount(
     MarketState memory state,
@@ -70,19 +70,19 @@ library MarketStateLib {
     return amount.rayMul(state.scaleFactor);
   }
 
-  /**
-   * @dev Scale an amount of normalized tokens using the current scale factor.
+  /*
+    @dev Scale an amount of normalized tokens using the current scale factor.
    */
   function scaleAmount(MarketState memory state, uint256 amount) internal pure returns (uint256) {
     return amount.rayDiv(state.scaleFactor);
   }
 
-  /**
-   * @dev Collateralization requirement is:
-   *      - 100% of all pending (unpaid) withdrawals
-   *      - 100% of all unclaimed (paid) withdrawals
-   *      - reserve ratio times the outstanding debt (supply - pending withdrawals)
-   *      - accrued protocol fees
+  /*
+    @dev Collateralization requirement is:
+         - 100% of all pending (unpaid) withdrawals
+         - 100% of all unclaimed (paid) withdrawals
+         - reserve ratio times the outstanding debt (supply - pending withdrawals)
+         - accrued protocol fees
    */
   function liquidityRequired(
     MarketState memory state
@@ -97,10 +97,10 @@ library MarketStateLib {
       state.normalizedUnclaimedWithdrawals;
   }
 
-  /**
-   * @dev Returns the amount of underlying assets that can be withdrawn
-   *      for protocol fees. The only debts with higher priority are
-   *      processed withdrawals that have not been executed.
+  /*
+    @dev Returns the amount of underlying assets that can be withdrawn
+         for protocol fees. The only debts with higher priority are
+         processed withdrawals that have not been executed.
    */
   function withdrawableProtocolFees(
     MarketState memory state,
@@ -110,15 +110,15 @@ library MarketStateLib {
     return uint128(MathUtils.min(totalAvailableAssets, state.accruedProtocolFees));
   }
 
-  /**
-   * @dev Returns the amount of underlying assets that can be borrowed.
-   *
-   *      The borrower must maintain sufficient assets in the market to
-   *      cover 100% of pending withdrawals, 100% of previously processed
-   *      withdrawals (before they are executed), and the reserve ratio
-   *      times the outstanding debt (deposits not pending withdrawal).
-   *
-   *      Any underlying assets in the market above this amount can be borrowed.
+  /*
+    @dev Returns the amount of underlying assets that can be borrowed.
+   
+         The borrower must maintain sufficient assets in the market to
+         cover 100% of pending withdrawals, 100% of previously processed
+         withdrawals (before they are executed), and the reserve ratio
+         times the outstanding debt (deposits not pending withdrawal).
+   
+         Any underlying assets in the market above this amount can be borrowed.
    */
   function borrowableAssets(
     MarketState memory state,
