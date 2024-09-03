@@ -66,10 +66,10 @@ contract WildcatArchController is SphereXConfig, Ownable {
   //                            SphereX Engine Update                           //
   // ========================================================================== //
 
-  /**
-   * @dev Update SphereX engine on registered contracts and add them as
-   *      allowed senders on the engine contract.
-   */
+  /*
+    @dev Update SphereX engine on registered contracts and add them as
+         allowed senders on the engine contract.
+  */
   function updateSphereXEngineOnRegisteredContracts(
     address[] calldata controllerFactories,
     address[] calldata controllers,
@@ -235,8 +235,6 @@ contract WildcatArchController is SphereXConfig, Ownable {
   function getBlacklistedAssetsCount() external view returns (uint256) {
     return _assetBlacklist.length();
   }
-
-
 
   /* ========================================================================== */
   /*                            Controller Factories                            */
