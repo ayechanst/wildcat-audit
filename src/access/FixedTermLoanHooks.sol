@@ -22,20 +22,20 @@ struct HookedMarket {
   uint32 fixedTermEndTime;
 }
 
-/**
- * @title FixedTermLoanHooks
- * @dev Hooks contract for wildcat markets. Restricts access to deposits
- *      to accounts that have credentials from approved role providers, or
- *      which are manually approved by the borrower. Restricts withdrawals
- *      until a fixed loan term has elapsed, which can be reduced but not
- *      increased by the borrower.
- *
- *      Withdrawals are restricted in the same way for users that have not
- *      made a deposit, while users who have made a deposit at any point (or
- *      received market tokens while having deposit access) will always remain
- *      approved, even if their access is later revoked.
- *
- *      Deposit access may be canceled by the borrower.
+/*
+  @title FixedTermLoanHooks
+  @dev Hooks contract for wildcat markets. Restricts access to deposits
+       to accounts that have credentials from approved role providers, or
+       which are manually approved by the borrower. Restricts withdrawals
+       until a fixed loan term has elapsed, which can be reduced but not
+       increased by the borrower.
+ 
+       Withdrawals are restricted in the same way for users that have not
+       made a deposit, while users who have made a deposit at any point (or
+       received market tokens while having deposit access) will always remain
+       approved, even if their access is later revoked.
+ 
+       Deposit access may be canceled by the borrower.
  */
 contract FixedTermLoanHooks is MarketConstraintHooks {
   // ========================================================================== //
@@ -123,11 +123,11 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
   //                                 Constructor                                //
   // ========================================================================== //
 
-  /**
-   * @param _deployer Address of the account that called the factory.
-   * @param {} unused extra bytes to match the constructor signature
-   *  restrictedFunctions Configuration specifying which functions to apply
-   *                            access controls to.
+  /*
+    @param _deployer Address of the account that called the factory.
+    @param {} unused extra bytes to match the constructor signature
+     restrictedFunctions Configuration specifying which functions to apply
+                               access controls to.
    */
   constructor(address _deployer, bytes memory /* args */) IHooks() {
     borrower = _deployer;
@@ -161,11 +161,11 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     return 'FixedTermLoanHooks';
   }
 
-  /**
-   * @dev Called when market is deployed using this contract as its `hooks`.
-   *
-   *      Note: Called inside the root `onCreateMarket` in the base contract,
-   *      so no need to verify the caller is the factory.
+  /*
+    @dev Called when market is deployed using this contract as its `hooks`.
+   
+         Note: Called inside the root `onCreateMarket` in the base contract,
+         so no need to verify the caller is the factory.
    */
   function _onCreateMarket(
     address deployer,
@@ -245,11 +245,11 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
   //                             Provider management                            //
   // ========================================================================== //
 
-  /**
-   * @dev Adds or updates a role provider that is able to grant user access.
-   *      If it is not already approved, it is added to `_roleProviders` and,
-   *      if the provider can refresh credentials, added to `pullProviders`.
-   *      If the provider is already approved, only updates `timeToLive`.
+  /*
+    @dev Adds or updates a role provider that is able to grant user access.
+         If it is not already approved, it is added to `_roleProviders` and,
+         if the provider can refresh credentials, added to `pullProviders`.
+         If the provider is already approved, only updates `timeToLive`.
    */
   function addRoleProvider(address providerAddress, uint32 timeToLive) external onlyBorrower {
     RoleProvider provider = _roleProviders[providerAddress];
@@ -279,9 +279,9 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     _roleProviders[providerAddress] = provider;
   }
 
-  /**
-   * @dev Removes a role provider from the `_roleProviders` mapping and, if it is a
-   *      pull provider, from the `_pullProviders` array.
+  /*
+    @dev Removes a role provider from the `_roleProviders` mapping and, if it is a
+         pull provider, from the `_pullProviders` array.
    */
   function removeRoleProvider(address providerAddress) external onlyBorrower {
     RoleProvider provider = _roleProviders[providerAddress];
@@ -295,11 +295,11 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     }
   }
 
-  /**
-   * @dev Remove a pull provider from the `_pullProviders` array.
-   *      If the provider is not the last in the array, the last provider
-   *      is moved to the index of the provider being removed, so its index
-   *      must also be updated in the `_roleProviders` mapping.
+  /*
+    @dev Remove a pull provider from the `_pullProviders` array.
+         If the provider is not the last in the array, the last provider
+         is moved to the index of the provider being removed, so its index
+         must also be updated in the `_roleProviders` mapping.
    */
   function _removePullProvider(uint24 indexToRemove) internal {
     // Get the last index in the array
@@ -350,16 +350,16 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     status = _lenderStatus[accountAddress];
   }
 
-  /**
-   * @dev Retrieves the current status of a lender, attempting to find a valid
-   *      credential if their current one is invalid or non-existent.
-   *
-   *      If the lender has an expired credential, will attempt to refresh it
-   *      with the previous provider if it is still supported.
-   *
-   *      If the lender has no credential, or one from a provider that is no longer
-   *      supported or will not refresh it, will loop over all providers to find
-   *      a valid credential.
+  /*
+    @dev Retrieves the current status of a lender, attempting to find a valid
+         credential if their current one is invalid or non-existent.
+   
+         If the lender has an expired credential, will attempt to refresh it
+         with the previous provider if it is still supported.
+   
+         If the lender has no credential, or one from a provider that is no longer
+         supported or will not refresh it, will loop over all providers to find
+         a valid credential.
    */
   function getLenderStatus(
     address accountAddress
@@ -401,14 +401,14 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
   //                                Role actions                                //
   // ========================================================================== //
 
-  /**
-   * @dev Grants a role to an account by updating the account's status.
-   *      Can only be called by an approved role provider.
-   *
-   *      If the account has an existing credential, it can only be updated if:
-   *      - the previous credential's provider is no longer supported, OR
-   *      - the caller is the previous role provider, OR
-   *      - the new expiry is later than the current expiry
+  /*
+    @dev Grants a role to an account by updating the account's status.
+         Can only be called by an approved role provider.
+   
+         If the account has an existing credential, it can only be updated if:
+         - the previous credential's provider is no longer supported, OR
+         - the caller is the previous role provider, OR
+         - the new expiry is later than the current expiry
    */
   function grantRole(address account, uint32 roleGrantedTimestamp) external {
     RoleProvider callingProvider = _roleProviders[msg.sender];
@@ -418,14 +418,14 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     _grantRole(callingProvider, account, roleGrantedTimestamp);
   }
 
-  /**
-   * @dev Grants roles to multiple accounts by updating their statuses.
-   *      Can only be called by an approved role provider.
-   *
-   *      If any account has an existing credential, it can only be updated if:
-   *      - the previous credential's provider is no longer supported, OR
-   *      - the caller is the previous role provider, OR
-   *      - the new expiry is later than the current expiry
+  /*
+    @dev Grants roles to multiple accounts by updating their statuses.
+         Can only be called by an approved role provider.
+   
+         If any account has an existing credential, it can only be updated if:
+         - the previous credential's provider is no longer supported, OR
+         - the caller is the previous role provider, OR
+         - the new expiry is later than the current expiry
    */
   function grantRoles(address[] memory accounts, uint32[] memory roleGrantedTimestamps) external {
     RoleProvider callingProvider = _roleProviders[msg.sender];
@@ -497,12 +497,12 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     emit AccountUnblockedFromDeposits(account);
   }
 
-  /**
-   * @dev Tries to pull an active credential for an account from a pull provider.
-   *      If one exists, updates the account in memory and returns true.
-   *
-   *      Note: Does not check that provider is a pull provider - should
-   *      only be called if that has already been checked.
+  /*
+    @dev Tries to pull an active credential for an account from a pull provider.
+         If one exists, updates the account in memory and returns true.
+   
+         Note: Does not check that provider is a pull provider - should
+         only be called if that has already been checked.
    */
   function _tryGetCredential(
     LenderStatus memory status,
@@ -514,13 +514,22 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
 
     uint32 credentialTimestamp;
     uint getCredentialSelector = uint32(IRoleProvider.getCredential.selector);
-    assembly {
+
+    /* assembly {
       mstore(0x00, getCredentialSelector)
       mstore(0x20, accountAddress)
       // Call the provider and check if the return data is valid
       if and(gt(returndatasize(), 0x1f), staticcall(gas(), providerAddress, 0x1c, 0x24, 0, 0x20)) {
         // If the return data is valid, set `credentialTimestamp` to the returned word
         // with a uint32 mask applied
+        credentialTimestamp := and(mload(0), 0xffffffff)
+      }
+    } */
+
+    assembly {
+      mstore(0x00, getCredentialSelector)
+      mstore(0x20, accountAddress)
+      if and(gt(returndatasize(), 0x1f), staticcall(gas(), providerAddress, 0x1c, 0x24, 0, 0x20)) {
         credentialTimestamp := and(mload(0), 0xffffffff)
       }
     }
@@ -544,20 +553,20 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     }
   }
 
-  /**
-   * @dev Uses the data added to the end of the base call to the market function to call
-   *      `validateCredential` on the selected provider. Returns false if the provider does not
-   *      exist, the call fails, or the credential is invalid. Only reverts if the call succeeds but
-   *      does not return the correct amount of data.
-   *
-   *      The calldata to the market function must have a suffix encoded as (address, bytes), where
-   *      the address is packed and the bytes do not contain an offset or length. For example, if
-   *      the market function were `fn(uint256 arg0)` and the user provided a 32 byte `accessToken`
-   *      for provider `provider0`, the calldata to the market would be:
-   *      [0:4] selector
-   *      [4:36] arg0
-   *      [36:58] provider0
-   *      [58:90] `accessToken`
+  /*
+    @dev Uses the data added to the end of the base call to the market function to call
+         `validateCredential` on the selected provider. Returns false if the provider does not
+         exist, the call fails, or the credential is invalid. Only reverts if the call succeeds but
+         does not return the correct amount of data.
+   
+         The calldata to the market function must have a suffix encoded as (address, bytes), where
+         the address is packed and the bytes do not contain an offset or length. For example, if
+         the market function were `fn(uint256 arg0)` and the user provided a 32 byte `accessToken`
+         for provider `provider0`, the calldata to the market would be:
+         [0:4] selector
+         [4:36] arg0
+         [36:58] provider0
+         [58:90] `accessToken`
    */
   function _tryValidateCredential(
     LenderStatus memory status,
@@ -570,7 +579,8 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     if (provider.isNull()) return false;
     uint credentialTimestamp;
     uint invalidCredentialReturnedSelector = uint32(InvalidCredentialReturned.selector);
-    assembly {
+
+    /* assembly {
       // Get the offset to the extra data provided in the hooks call, after the provider.
       let validateDataCalldataPointer := add(hooksData.offset, 0x14)
       // Encode the call to `validateCredential(address account, bytes calldata data)`
@@ -609,6 +619,35 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
           credentialTimestamp := and(mload(0), 0xffffffff)
         }
       }
+    } */
+
+    assembly {
+      let validateDataCalldataPointer := add(hooksData.offset, 0x14)
+      let calldataPointer := mload(0x40)
+      mstore(calldataPointer, validateSelector)
+      mstore(add(calldataPointer, 0x20), accountAddress)
+      mstore(add(calldataPointer, 0x40), 0x40)
+      let dataLength := sub(hooksData.length, 0x14)
+      mstore(add(calldataPointer, 0x60), dataLength)
+      calldatacopy(add(calldataPointer, 0x80), validateDataCalldataPointer, dataLength)
+      if call(
+        gas(),
+        providerAddress,
+        0,
+        add(calldataPointer, 0x1c),
+        add(dataLength, 0x64),
+        0,
+        0x20
+      ) {
+        switch lt(returndatasize(), 0x20)
+        case 1 {
+          mstore(0, invalidCredentialReturnedSelector)
+          revert(0x1c, 0x04)
+        }
+        default {
+          credentialTimestamp := and(mload(0), 0xffffffff)
+        }
+      }
     }
     // If the returned timestamp is null or greater than the current time, return false.
     if (credentialTimestamp == 0 || credentialTimestamp > block.timestamp) {
@@ -635,21 +674,21 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     }
   }
 
-  /**
-   * @dev Handles the hooks data passed to the contract.
-   *
-   *      If the hooks data is 20 bytes long, it is interpreted as a provider selection
-   *      to pull a credential from with `getCredential`.
-   *
-   *      If the hooks data is more than 20 bytes, it is interpreted as a request to use
-   *      `validateCredential`, where the first 20 bytes encode the provider address and
-   *      the remaining bytes are the encoded credential data to pass to the provider.
-   *
-   *      If the hooks data is less than 20 bytes, it is skipped.
-   *
-   * @param status Current lender status object, updated in memory if a credential is found
-   * @param accountAddress Address of the lender
-   * @param hooksData Bytes passed to the contract for provider selection
+  /*
+    @dev Handles the hooks data passed to the contract.
+   
+         If the hooks data is 20 bytes long, it is interpreted as a provider selection
+         to pull a credential from with `getCredential`.
+   
+         If the hooks data is more than 20 bytes, it is interpreted as a request to use
+         `validateCredential`, where the first 20 bytes encode the provider address and
+         the remaining bytes are the encoded credential data to pass to the provider.
+   
+         If the hooks data is less than 20 bytes, it is skipped.
+   
+    @param status Current lender status object, updated in memory if a credential is found
+    @param accountAddress Address of the lender
+    @param hooksData Bytes passed to the contract for provider selection
    */
   function _handleHooksData(
     LenderStatus memory status,
@@ -672,21 +711,21 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     }
   }
 
-  /**
-   * @dev Internal function used to validate or update the status of a lender account for
-   *      hooks on restricted actions.
-   *
-   *     The function follows these steps until a valid credential is found:
-   *       1. Check if lender has an existing unexpired credential.
-   *       2. Check if `hooksData` was provided, and if so:
-   *         - If it contains only an address, call `getCredential` on that provider.
-   *         - If it contains an address and bytes, call `validateCredential` on that provider.
-   *       3. If lender has an existing expired credential, attempt to refresh it.
-   *       4. Loop over all pull providers to find a valid credential, excluding the last provider
-   *          if it failed to refresh.
-   *
-   * note: Does not update storage or emit an event, but is stateful because it can invoke
-   *       `validateCredential` on a provider.
+  /*
+    @dev Internal function used to validate or update the status of a lender account for
+         hooks on restricted actions.
+   
+        The function follows these steps until a valid credential is found:
+          1. Check if lender has an existing unexpired credential.
+          2. Check if `hooksData` was provided, and if so:
+            - If it contains only an address, call `getCredential` on that provider.
+            - If it contains an address and bytes, call `validateCredential` on that provider.
+          3. If lender has an existing expired credential, attempt to refresh it.
+          4. Loop over all pull providers to find a valid credential, excluding the last provider
+             if it failed to refresh.
+   
+    note: Does not update storage or emit an event, but is stateful because it can invoke
+          `validateCredential` on a provider.
    */
   function _tryValidateAccessInner(
     LenderStatus memory status,
@@ -742,10 +781,10 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     _writeLenderStatus(status, accountAddress, hasValidCredential, wasUpdated, false);
   }
 
-  /**
-   * @dev Updates a lender's status in storage and emits an event when a
-   *      credential is granted or revoked, or when the lender is marked
-   *      as a known lender.
+  /*
+    @dev Updates a lender's status in storage and emits an event when a
+         credential is granted or revoked, or when the lender is marked
+         as a known lender.
    */
   function _writeLenderStatus(
     LenderStatus memory status,
@@ -797,10 +836,10 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
   //                                    Hooks                                   //
   // ========================================================================== //
 
-  /**
-   * @dev Called when a lender attempts to deposit.
-   *      Passes the check if the lender is not blocked from deposits
-   *      and has a valid credential from an approved role provider.
+  /*
+    @dev Called when a lender attempts to deposit.
+         Passes the check if the lender is not blocked from deposits
+         and has a valid credential from an approved role provider.
    */
   function onDeposit(
     address lender,
@@ -839,11 +878,11 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     _writeLenderStatus(status, lender, hasValidCredential, roleUpdated, true);
   }
 
-  /**
-   * @dev Called when a lender attempts to queue a withdrawal.
-   *      Passes the check if the lender has previously deposited or received
-   *      market tokens while having the ability to deposit, or currently has a
-   *      valid credential from an approved role provider.
+  /*
+    @dev Called when a lender attempts to queue a withdrawal.
+         Passes the check if the lender has previously deposited or received
+         market tokens while having the ability to deposit, or currently has a
+         valid credential from an approved role provider.
    */
   function onQueueWithdrawal(
     address lender,
@@ -867,8 +906,8 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     }
   }
 
-  /**
-   * @dev Hook not implemented for this contract.
+  /*
+    @dev Hook not implemented for this contract.
    */
   function onExecuteWithdrawal(
     address lender,
@@ -877,18 +916,18 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     bytes calldata hooksData
   ) external override {}
 
-  /**
-   * @dev Called when a lender attempts to transfer market tokens on a market
-   *      that requires credentials for either transfers or withdrawals.
-   *
-   *      Allows the transfer if the recipient:
-   *      - is a known lender OR
-   *      - is not blocked AND
-   *        - has a valid credential OR
-   *        - market does not require a credential for transfers
-   *
-   *    If the recipient is not a known lender but does have a valid
-   *    credential, they will be marked as a known lender.
+  /*
+    @dev Called when a lender attempts to transfer market tokens on a market
+         that requires credentials for either transfers or withdrawals.
+   
+         Allows the transfer if the recipient:
+         - is a known lender OR
+         - is not blocked AND
+           - has a valid credential OR
+           - market does not require a credential for transfers
+   
+       If the recipient is not a known lender but does have a valid
+       credential, they will be marked as a known lender.
    */
   function onTransfer(
     address /* caller */,
@@ -922,8 +961,8 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     }
   }
 
-  /**
-   * @dev Hook not implemented for this contract.
+  /*
+    @dev Hook not implemented for this contract.
    */
   function onBorrow(
     uint /* normalizedAmount */,
@@ -931,8 +970,8 @@ contract FixedTermLoanHooks is MarketConstraintHooks {
     bytes calldata /* extraData */
   ) external override {}
 
-  /**
-   * @dev Hook not implemented for this contract.
+  /*
+    @dev Hook not implemented for this contract.
    */
   function onRepay(
     uint normalizedAmount,
