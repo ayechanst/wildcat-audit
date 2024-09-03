@@ -68,11 +68,11 @@ abstract contract MarketConstraintHooks is IHooks {
     }
   }
 
-  /**
-   * @dev Enforce constraints on market parameters, ensuring that
-   *      `annualInterestBips`, `delinquencyFeeBips`, `withdrawalBatchDuration`,
-   *      `reserveRatioBips` and `delinquencyGracePeriod` are within the
-   *      allowed ranges and that `namePrefix` and `symbolPrefix` are not null.
+  /*
+    @dev Enforce constraints on market parameters, ensuring that
+         `annualInterestBips`, `delinquencyFeeBips`, `withdrawalBatchDuration`,
+         `reserveRatioBips` and `delinquencyGracePeriod` are within the
+         allowed ranges and that `namePrefix` and `symbolPrefix` are not null.
    */
   function enforceParameterConstraints(
     uint16 annualInterestBips,
@@ -113,9 +113,9 @@ abstract contract MarketConstraintHooks is IHooks {
     );
   }
 
-  /**
-   * @dev Returns immutable constraints on market parameters that
-   *      the controller variant will enforce.
+  /*
+    @dev Returns immutable constraints on market parameters that
+         the controller variant will enforce.
    */
   function getParameterConstraints()
     external
@@ -149,13 +149,13 @@ abstract contract MarketConstraintHooks is IHooks {
     );
   }
 
-  /**
-   * @dev Returns the new temporary reserve ratio for a given interest rate
-   *      change. This is calculated as no change if the rate change is LEQ
-   *      a 25% decrease, otherwise double the relative difference between
-   *      the old and new APR rates (in bips), bounded to a maximum of 100%.
-   *      If this value is lower than the existing reserve ratio, the existing
-   *      reserve ratio is returned instead.
+  /*
+    @dev Returns the new temporary reserve ratio for a given interest rate
+         change. This is calculated as no change if the rate change is LEQ
+         a 25% decrease, otherwise double the relative difference between
+         the old and new APR rates (in bips), bounded to a maximum of 100%.
+         If this value is lower than the existing reserve ratio, the existing
+         reserve ratio is returned instead.
    */
   function _calculateTemporaryReserveRatioBips(
     uint256 annualInterestBips,
@@ -185,21 +185,21 @@ abstract contract MarketConstraintHooks is IHooks {
     }
   }
 
-  /**
-   * @dev Hook to enforce constraints on changes to the annual interest rate
-   *      and reserve ratio. Reducing the APR triggers an update period of two weeks,
-   *      during which the market's reserve ratio is temporarily increased proportionally
-   *      to the reduction. The original APR is pegged to the previous value during this
-   *      time to prevent abuse of the allowed 25% unpenalized reduction.
-   *
-   * @param annualInterestBips The new annual interest rate in bips provided by the borrower.
-   * @param {} Unused parameter for the reserve ratio bips provided by the borrower.
-   * @param intermediateState The current state of the market.
-   * @param {} Unused parameter for extra data.
-   *
-   * @return newAnnualInterestBips The new annual interest rate in bips to be set.
-   *                               always equal to the input parameter.
-   * @return newReserveRatioBips The new reserve ratio in bips to be set.
+  /*
+    @dev Hook to enforce constraints on changes to the annual interest rate
+         and reserve ratio. Reducing the APR triggers an update period of two weeks,
+         during which the market's reserve ratio is temporarily increased proportionally
+         to the reduction. The original APR is pegged to the previous value during this
+         time to prevent abuse of the allowed 25% unpenalized reduction.
+   
+    @param annualInterestBips The new annual interest rate in bips provided by the borrower.
+    @param {} Unused parameter for the reserve ratio bips provided by the borrower.
+    @param intermediateState The current state of the market.
+    @param {} Unused parameter for extra data.
+   
+    @return newAnnualInterestBips The new annual interest rate in bips to be set.
+                                  always equal to the input parameter.
+    @return newReserveRatioBips The new reserve ratio in bips to be set.
    */
   function onSetAnnualInterestAndReserveRatioBips(
     uint16 annualInterestBips,
